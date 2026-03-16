@@ -123,23 +123,41 @@ body { margin: 0; background: var(--bg); color: var(--txt); font-family: Inter, 
 }
 
 .auth-card{
-  width: min(520px, 92vw);
+  width: min(500px, 92vw);
   background: var(--card);
   border: 1px solid var(--stroke);
   border-radius: 20px;
   box-shadow: var(--shadow);
   backdrop-filter: blur(14px) saturate(125%);
   -webkit-backdrop-filter: blur(14px) saturate(125%);
-  padding: 32px 28px;
+  padding: 32px 32px;
 
 }
 
+.auth-card-header{
+  
+position: absolute;   /* take it out of normal flow */
+  top: 12px;            /* adjust to taste */
+  right: 16px;          /* adjust to taste */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;          
+}
+
+.auth-card-header svg{
+  width: 44px;
+  height: 44px;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.35));
+}
+
 .auth-title{
-  margin: 0 0 20px 0;
+  margin: 0;   
+  padding: 24px;                  
   font-size: 20px;
   font-weight: 500;
   color: #fff;
-  align-items: center;
+  text-align: center;
 }
 
 /* Original form structure preserved; just styling */
@@ -153,14 +171,14 @@ body { margin: 0; background: var(--bg); color: var(--txt); font-family: Inter, 
   border-radius: 12px;
   border: 1px solid var(--stroke);
   outline: none;
-  background: #0f0f18;
+  background-color: #43434a;
   color: var(--txt);
   transition: border-color .2s, box-shadow .2s, background .2s;
 }
 .form-control:focus{
   border-color: rgba(124,58,237,0.75);
   box-shadow: 0 0 0 4px rgba(124,58,237,0.15);
-  background: #101022;
+  background: #67676d;
 }
 
 .err{
@@ -219,7 +237,7 @@ body { margin: 0; background: var(--bg); color: var(--txt); font-family: Inter, 
 @media (max-width: 520px){
   .poster-columns{ gap: 12px; padding: 16px; }
   .poster-col img{ border-radius: 12px; }
-  .auth-card{ padding: 24px 18px; }
+  .auth-card{ padding: 20px 18px; }
 }
 
 /* Reduced motion preference */

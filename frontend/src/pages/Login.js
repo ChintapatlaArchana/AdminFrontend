@@ -74,13 +74,11 @@ export const Login = () => {
 
       {/* RIGHT: Original form inside a styled card */}
       <main className="auth-side">
-        <div className="auth-card">
-            <div className="auth-header">
+        <div className="auth-card-header">
                 <MediaTrackLogo />
             </div>
-
-          <h1 className="auth-title">Log in to your account</h1>
-
+        <div className="auth-card">
+            <h1 className="auth-title">Log in to your account</h1>
           <div className="container">
             <form onSubmit={handleSubmit(submit)}>
 
