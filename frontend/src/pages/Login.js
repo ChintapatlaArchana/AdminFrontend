@@ -21,52 +21,57 @@ export const Login = () => {
         console.error("Login failed");
       });
   };
+  
+  const movieImages = Array.from({ length: 24 }, (_, i) =>
+    `/img/img${i + 1}.jpg`
+  );
+
+  
+const PosterCol = ({ images, direction = "up" }) => (
+  <div className={`poster-col ${direction}`}>
+    {/* First copy */}
+    {images.map((src, i) => (
+      <img
+        key={`a-${i}`}
+        src={src}
+        alt=""
+        width={300}
+        height={450}
+        loading="lazy"
+        decoding="async"
+      />
+    ))}
+    
+    {/* Second copy for seamless loop */}
+    {images.map((src, i) => (
+      <img
+        key={`b-${i}`}
+        src={src}
+        alt=""
+        width={300}
+        height={450}
+        loading="lazy"
+        decoding="async"
+      />
+    ))}
+  </div>
+);
+  
+const col1 = movieImages.slice(0, 6);
+const col2 = movieImages.slice(6, 12);
+const col3 = movieImages.slice(12, 18);
+const col4 = movieImages.slice(18, 24);
+
 
   return (
     <div className="login-root">
       {/* LEFT: OTT poster wall with alternating vertical marquee */}
       <aside className="poster-wall" aria-hidden="true">
         <div className="poster-columns">
-          {/* Column 1 (scroll up) */}
-          <div className="poster-col up">
-            {/* Replace the srcs with your actual poster thumbnails */}
-            <img src="https://picsum.photos/id/1011/300/450" alt="" />
-            <img src="https://picsum.photos/id/1027/300/450" alt="" />
-            <img src="https://picsum.photos/id/1021/300/450" alt="" />
-            <img src="https://picsum.photos/id/1035/300/450" alt="" />
-            <img src="https://picsum.photos/id/1045/300/450" alt="" />
-            <img src="https://picsum.photos/id/1052/300/450" alt="" />
-          </div>
-
-          {/* Column 2 (scroll down) */}
-          <div className="poster-col down">
-            <img src="https://picsum.photos/id/1069/300/450" alt="" />
-            <img src="https://picsum.photos/id/1074/300/450" alt="" />
-            <img src="https://picsum.photos/id/1080/300/450" alt="" />
-            <img src="https://picsum.photos/id/1084/300/450" alt="" />
-            <img src="https://picsum.photos/id/1081/300/450" alt="" />
-            <img src="https://picsum.photos/id/1082/300/450" alt="" />
-          </div>
-
-          {/* Column 3 (scroll up) */}
-          <div className="poster-col up">
-            <img src="https://picsum.photos/id/109/300/450" alt="" />
-            <img src="https://picsum.photos/id/110/300/450" alt="" />
-            <img src="https://picsum.photos/id/111/300/450" alt="" />
-            <img src="https://picsum.photos/id/112/300/450" alt="" />
-            <img src="https://picsum.photos/id/113/300/450" alt="" />
-            <img src="https://picsum.photos/id/114/300/450" alt="" />
-          </div>
-
-          {/* Column 4 (scroll down) */}
-          <div className="poster-col down">
-            <img src="https://picsum.photos/id/115/300/450" alt="" />
-            <img src="https://picsum.photos/id/116/300/450" alt="" />
-            <img src="https://picsum.photos/id/117/300/450" alt="" />
-            <img src="https://picsum.photos/id/118/300/450" alt="" />
-            <img src="https://picsum.photos/id/119/300/450" alt="" />
-            <img src="https://picsum.photos/id/120/300/450" alt="" />
-          </div>
+          <PosterCol images={col1} direction="up" />
+          <PosterCol images={col2} direction="down" />
+          <PosterCol images={col3} direction="up" />
+          <PosterCol images={col4} direction="down" />
         </div>
         <div className="poster-gradient-left" />
         <div className="poster-gradient-right" />

@@ -49,7 +49,7 @@ body { margin: 0; background: var(--bg); color: var(--txt); font-family: Inter, 
   flex-direction: column;
   gap: 18px;
   /* Duplicate content for seamless loop (handled by animation translate) */
-  animation-duration: 26s;
+  animation-duration: 45s;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
   will-change: transform;
@@ -131,6 +131,7 @@ body { margin: 0; background: var(--bg); color: var(--txt); font-family: Inter, 
   backdrop-filter: blur(14px) saturate(125%);
   -webkit-backdrop-filter: blur(14px) saturate(125%);
   padding: 32px 32px;
+  margin-left: -40px;
 
 }
 
