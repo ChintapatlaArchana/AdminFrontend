@@ -23,16 +23,16 @@ export const MediaTrackLogo = ({
         <defs>
           {/* subtle vignette for the disk */}
           <radialGradient id="mt_disk_grad" cx="50%" cy="45%" r="70%">
-            <stop offset="0%"  stopColor="#111523" />
-            <stop offset="70%" stopColor="#0D1020" />
-            <stop offset="100%" stopColor="#0A0D18" />
+            <stop offset="0%"  stopColor="#121212" />
+            <stop offset="70%" stopColor="#050505" />
+            <stop offset="100%" stopColor="#000000" />
           </radialGradient>
 
           {/* purple gradient ring */}
           <linearGradient id="mt_ring_grad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%"   stopColor="#BBA6FF" />
-            <stop offset="45%"  stopColor="#8C67FF" />
-            <stop offset="100%" stopColor="#6A3AFF" />
+            <stop offset="0%"   stopColor="#C084FC" />
+            <stop offset="45%"  stopColor="#9333EA" />
+            <stop offset="100%" stopColor="#6B21A8" />
           </linearGradient>
 
           {/* inner glow under the ring */}
@@ -46,8 +46,8 @@ export const MediaTrackLogo = ({
 
           {/* play icon gradient (slightly lighter at tip) */}
           <linearGradient id="mt_play_grad" x1="30%" y1="30%" x2="85%" y2="60%">
-            <stop offset="0%"   stopColor="#BCA8FF"/>
-            <stop offset="100%" stopColor="#8F6BFF"/>
+            <stop offset="0%"   stopColor="#C084FC"/>
+            <stop offset="100%" stopColor="#9333EA"/>
           </linearGradient>
         </defs>
 
@@ -88,8 +88,8 @@ export const MediaTrackLogo = ({
             lineHeight: 1,
           }}
         >
-          <span style={{ color: "#FFFFFF", fontWeight: 600, fontSize: 16 }}>Media</span>
-          <span style={{ color: "#B8B1D6", fontWeight: 600, fontSize: 16 }}>Track</span>
+          <span style={{ color: "#FAFAFA", fontWeight: 600, fontSize: 16 }}>Media</span>
+          <span style={{ color: "#A1A1AA", fontWeight: 600, fontSize: 16 }}>Track</span>
         </div>
       )}
     </div>
