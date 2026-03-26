@@ -1,54 +1,44 @@
 import React, { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
+import { adminService } from '../../services/adminService';
 import './AudienceEngagement.css';
 
 export const AudienceEngagement = () => {
   const [loading, setLoading] = useState(true);
-  
-  // Helper to generate trend data
-  const generateTrendData = (days, startFrom, baseValDau, baseValMau) => {
-    const data = [];
-    const baseDate = new Date(startFrom);
-    for (let i = 0; i < days; i++) {
-      const date = new Date(baseDate);
-      date.setDate(baseDate.getDate() + i);
-      const dateStr = date.toISOString().split('T')[0];
-      
-      const variation = Math.sin(i * 0.5) * 2000 + (Math.random() - 0.5) * 1000;
-      
-      data.push({
-        date: dateStr,
-        dau: Math.round(baseValDau + variation),
-        mau: Math.round(baseValMau + variation * 0.8)
-      });
-    }
-    return data;
-  };
-
-  const generateWatchTimeData = (days, startFrom, baseVal) => {
-    const data = [];
-    const baseDate = new Date(startFrom);
-    for (let i = 0; i < days; i++) {
-        const date = new Date(baseDate);
-        date.setDate(baseDate.getDate() + i);
-        const dateStr = date.toISOString().split('T')[0];
-        
-        const variation = Math.sin(i * 0.8) * 15000 + (Math.random() - 0.5) * 5000;
-        
-        data.push({
-            date: dateStr,
-            value: Math.round(baseVal + variation)
-        });
-    }
-    return data;
-  };
-
-  const trendData90 = generateTrendData(90, '2025-01-02', 17400, 49663);
-  const watchTimeData30 = generateWatchTimeData(30, '2025-03-01', 134518);
+  const [metrics, setMetrics] = useState({
+    avgDau: 0,
+    avgMau: 0,
+    avgWatchTime: 0,
+    avgCompletion: 0
+  });
+  const [dauMauTrend, setDauMauTrend] = useState([]);
+  const [watchTimeTrend, setWatchTimeTrend] = useState([]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [kpis, trends, watchTrends] = await Promise.all([
+          adminService.getEngagementKPIs(),
+          adminService.getAudienceTrends(),
+          adminService.getWatchTimeTrends()
+        ]);
+        
+        setMetrics({
+          avgDau: kpis?.avgDau || 0,
+          avgMau: kpis?.avgMau || 0,
+          avgWatchTime: kpis?.avgWatchTime || 0,
+          avgCompletion: kpis?.avgCompletion || 0
+        });
+        setDauMauTrend(trends || []);
+        setWatchTimeTrend(watchTrends || []);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
   // Common styles for tooltips
@@ -81,25 +71,25 @@ export const AudienceEngagement = () => {
     grid: { top: '10%', left: '3%', right: '4%', bottom: '15%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: trendData90.map(d => d.date),
+      data: dauMauTrend.map(d => d.date),
       axisLine: { lineStyle: { color: '#333' } },
       axisLabel: { color: '#666', fontSize: 10, interval: 14 },
       splitLine: { show: true, lineStyle: { color: 'rgba(255,255,255,0.03)', type: 'dashed' } }
     },
     yAxis: {
       type: 'value',
-      min: 0, max: 60000, interval: 15000,
+      min: 0, max: 60, interval: 10,
       axisLine: { show: false },
       axisLabel: { color: '#666' },
       splitLine: { show: true, lineStyle: { color: 'rgba(255,255,255,0.05)', type: 'dashed' } }
     },
     series: [
       {
-        name: 'Daily Active Users', type: 'line', data: trendData90.map(d => d.dau),
+        name: 'Daily Active Users', type: 'line', data: dauMauTrend.map(d => d.dau),
         symbol: 'circle', symbolSize: 4, itemStyle: { color: '#E879F9' }, lineStyle: { width: 2 }
       },
       {
-        name: 'Monthly Active Users', type: 'line', data: trendData90.map(d => d.mau),
+        name: 'Monthly Active Users', type: 'line', data: dauMauTrend.map(d => d.mau),
         symbol: 'circle', symbolSize: 4, itemStyle: { color: '#9333EA' }, lineStyle: { width: 2 }
       }
     ]
@@ -123,20 +113,20 @@ export const AudienceEngagement = () => {
     grid: { top: '10%', left: '3%', right: '4%', bottom: '15%', containLabel: true },
     xAxis: {
       type: 'category',
-      data: watchTimeData30.map(d => d.date),
+      data: watchTimeTrend.map(d => d.date),
       axisLine: { lineStyle: { color: '#333' } },
-      axisLabel: { color: '#666', fontSize: 10, interval: 2 },
+      axisLabel: { color: '#666', fontSize: 10, interval: 4 },
       splitLine: { show: true, lineStyle: { color: 'rgba(255,255,255,0.03)', type: 'dashed' } }
     },
     yAxis: {
       type: 'value',
-      min: 0, max: 160000, interval: 40000,
+      min: 0, max: 24000, interval: 4000,
       axisLine: { show: false },
       axisLabel: { color: '#666' },
       splitLine: { show: true, lineStyle: { color: 'rgba(255,255,255,0.05)', type: 'dashed' } }
     },
     series: [{
-      name: 'Watch Time', type: 'line', data: watchTimeData30.map(d => d.value),
+      name: 'Watch Time', type: 'line', data: watchTimeTrend.map(d => d.watchTime),
       symbol: 'circle', symbolSize: 6,
       itemStyle: { color: '#fff', borderColor: '#9333EA', borderWidth: 2 },
       lineStyle: { width: 3, color: '#9333EA' },
@@ -168,7 +158,7 @@ export const AudienceEngagement = () => {
               <span>Avg DAU (90d)</span>
               <i className="bi bi-people"></i>
             </div>
-            <div className="metric-value">17,400</div>
+            <div className="metric-value">{metrics.avgDau.toLocaleString()}</div>
             <div className="metric-sub mt-2">Daily active reach</div>
           </div>
         </div>
@@ -178,7 +168,7 @@ export const AudienceEngagement = () => {
               <span>Avg MAU (90d)</span>
               <i className="bi bi-people-fill"></i>
             </div>
-            <div className="metric-value">49,663</div>
+            <div className="metric-value">{metrics.avgMau.toLocaleString()}</div>
             <div className="metric-sub mt-2">Monthly active reach</div>
           </div>
         </div>
@@ -188,7 +178,7 @@ export const AudienceEngagement = () => {
               <span>Avg Watch Time (30d)</span>
               <i className="bi bi-clock-history"></i>
             </div>
-            <div className="metric-value">1,34,518</div>
+            <div className="metric-value">{metrics.avgWatchTime.toLocaleString()}</div>
             <div className="metric-sub mt-1">minutes</div>
           </div>
         </div>
@@ -198,7 +188,7 @@ export const AudienceEngagement = () => {
               <span>Avg Completion (30d)</span>
               <i className="bi bi-check2-circle"></i>
             </div>
-            <div className="metric-value">72%</div>
+            <div className="metric-value">{metrics.avgCompletion}%</div>
             <div className="metric-sub mt-2">Content finish rate</div>
           </div>
         </div>
