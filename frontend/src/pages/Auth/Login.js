@@ -10,8 +10,6 @@ export const Login = () => {
   const navigate = useNavigate();
 
   const submit = (data) => {
-    alert('email is ' + data.email);
-    alert('password is ' + data.password);
     axios.post("http://localhost:8082/user/login", data)
       .then(response => {
         const { token, role } = response.data;
