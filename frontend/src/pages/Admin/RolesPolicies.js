@@ -6,50 +6,70 @@ import './RolesPolicies.css';
 export const RolesPolicies = () => {
   const [loading, setLoading] = useState(true);
   const [totalUsers, setTotalUsers] = useState(0);
-  const [adminStats, setAdminStats] = useState({ active: 22, inactive: 3 });
-  
-  // Chart Data
-  const roleDistribution = [
-    { name: 'Viewer/Subscriber', value: 850 },
-    { name: 'Platform Operator', value: 50 },
-    { name: 'Content Editor', value: 45 },
-    { name: 'Ad Ops/Sales', value: 30 },
-    { name: 'Media Admin', value: 25 }
-  ];
+  const [adminStats, setAdminStats] = useState(0);
+  const [roleDistribution, setRoleDistribution] = useState([]);
+  const [entitlementScopeData, setEntitlementScopeData] = useState([]);
+  const [driftData, setDriftData] = useState([]);
+  const [expiringGrants, setExpiringGrants] = useState({ lessThan7Days: 0, sevenTo30Days: 0, moreThan30Days: 0 });
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 10;
 
-  const entitlementScopeData = [
-    { name: 'All Content', value: 70 },
-    { name: 'Category', value: 20 },
-    { name: 'Title Only', value: 10 }
-  ];
-
-  const driftData = [
-    { name: 'User2Name', email: 'user2@example.com', scope: 'Category', granted: '2024-10-20', expiry: '2025-07-20' },
-    { name: 'User6Name', email: 'user6@example.com', scope: 'Title', granted: '2024-06-19', expiry: '2024-12-19' },
-    { name: 'User12Name', email: 'user12@example.com', scope: 'Category', granted: '2024-04-06', expiry: '2025-05-06' },
-    { name: 'User19Name', email: 'user19@example.com', scope: 'Category', granted: '2024-11-25', expiry: '2025-02-25' },
-    { name: 'User20Name', email: 'user20@example.com', scope: 'Category', granted: '2024-09-05', expiry: '2025-08-05' },
-    { name: 'User21Name', email: 'user21@example.com', scope: 'Title', granted: '2024-05-11', expiry: '2025-05-11' },
-    { name: 'User22Name', email: 'user22@example.com', scope: 'Title', granted: '2024-11-17', expiry: '2025-09-17' },
-    { name: 'User36Name', email: 'user36@example.com', scope: 'Title', granted: '2024-02-09', expiry: '2024-04-09' },
-    { name: 'User39Name', email: 'user39@example.com', scope: 'Title', granted: '2024-04-15', expiry: '2024-11-15' },
-    { name: 'User54Name', email: 'user54@example.com', scope: 'Title', granted: '2024-04-06', expiry: '2024-09-06' }
-  ];
-
+  // Initial fetch for dashboard stats
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchStats = async () => {
+      try {
+        const [userCount, stats, roles, entitlements, grants] = await Promise.all([
+          adminService.getTotalUserCount(),
+          adminService.getAdminStats(),
+          adminService.getRoleDistribution(),
+          adminService.getEntitlementDistribution(),
+          adminService.getExpiringGrants()
+        ]);
+        console.log("1. Total Users:", userCount);
+        console.log("2. Admin Stats Object:", stats);
+        console.log("3. Roles Map:", roles);
+        setTotalUsers(userCount || 0);
+        setAdminStats(stats ||0);
+        if (roles && typeof roles === 'object' && !Array.isArray(roles)) {
+      setRoleDistribution(Object.entries(roles).map(([name, value]) => ({ name, value })));
+    } else {
+      setRoleDistribution(roles || []);
+    }
+
+    // 4. Entitlement Scope (TRANSFORM MAP TO ARRAY)
+    // Backend: { "All": 6, "Category": 3 } -> Frontend: [{name: "All", value: 6}]
+    if (entitlements && typeof entitlements === 'object' && !Array.isArray(entitlements)) {
+      setEntitlementScopeData(Object.entries(entitlements).map(([name, value]) => ({ name, value })));
+    } else {
+      setEntitlementScopeData(entitlements || []);
+    }
+        
+        setExpiringGrants(grants || { lessThan7Days: 0, sevenTo30Days: 0, moreThan30Days: 0 });
+      } catch (e) {
+        console.error("Error fetching stats:", e);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  // Fetch paginated drift data
+  useEffect(() => {
+    const fetchDrift = async () => {
       try {
         setLoading(true);
-        const count = await adminService.getTotalUserCount();
-        setTotalUsers(count || 1024);
+        const response = await adminService.getPolicyDrift(currentPage - 1, rowsPerPage);
+        // Expecting { content: [], totalPages: 0 } from backend
+        setDriftData(response.content || response || []);
+        setTotalPages(response.totalPages || 0);
       } catch (e) {
-        console.error(e);
+        console.error("Error fetching drift data:", e);
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
-  }, []);
+    fetchDrift();
+  }, [currentPage]);
 
   // ECharts Options
   const barOption = {
@@ -99,21 +119,19 @@ export const RolesPolicies = () => {
       </div>
 
       <div className="row g-4 mb-4">
-        {/* Metric Cards */}
-        <div className="col-md-4">
+        {loading ? (
+          <div className="text-center w-100 mt-5"><div className="spinner-border text-light" role="status"></div></div>
+        ) : (
+          <React.Fragment>
+            {/* Metric Cards */}
+            <div className="col-md-4">
           <div className="metric-card">
             <div className="metric-header text-secondary mb-1">
               <span>Admin Accounts</span>
               <i className="bi bi-shield-lock"></i>
             </div>
-            <div className="d-flex align-items-baseline">
-                <div className="metric-value me-2">{adminStats.active + adminStats.inactive}</div>
-                <div className="metric-sub">Total</div>
-            </div>
-            <div className="mt-3 small">
-              <span className="text-success me-3"><i className="bi bi-circle-fill me-1" style={{fontSize: '7px'}}></i> {adminStats.active} Active</span>
-              <span className="text-danger"><i className="bi bi-circle-fill me-1" style={{fontSize: '7px'}}></i> {adminStats.inactive} Inactive</span>
-            </div>
+              <div className="metric-value me-2">{adminStats}</div>
+              <div className="metric-sub mt-2">Total</div>
           </div>
         </div>
 
@@ -137,19 +155,21 @@ export const RolesPolicies = () => {
             <div className="mt-2">
                <div className="d-flex justify-content-between text-secondary small mb-1">
                   <span>&lt; 7 Days</span>
-                  <span className="text-danger fw-bold">12</span>
+                  <span className="text-danger fw-bold">{expiringGrants.lessThan7Days}</span>
                </div>
                <div className="d-flex justify-content-between text-secondary small mb-1">
                   <span>7-30 Days</span>
-                  <span className="text-warning fw-bold">34</span>
+                  <span className="text-warning fw-bold">{expiringGrants.sevenTo30Days}</span>
                </div>
                <div className="d-flex justify-content-between text-secondary small">
                   <span>&gt; 30 Days</span>
-                  <span className="text-success fw-bold">89</span>
+                  <span className="text-success fw-bold">{expiringGrants.moreThan30Days}</span>
                </div>
             </div>
           </div>
         </div>
+          </React.Fragment>
+        )}
       </div>
 
       {/* Charts Row */}
@@ -202,17 +222,42 @@ export const RolesPolicies = () => {
                     <td className="user-name-cell">{user.name}</td>
                     <td className="email-cell">{user.email}</td>
                     <td>
-                      <span className={`badge-mt badge-${user.scope.toLowerCase()}`}>
-                        {user.scope}
+                      <span className={`badge-mt badge-${user.contentScope}`}>
+                        {user.contentScope}
                       </span>
                     </td>
-                    <td className="date-cell">{user.granted}</td>
-                    <td className="date-cell">{user.expiry}</td>
+                    <td className="date-cell">{user.grantedDate}</td>
+                    <td className="date-cell">{user.expiryDate}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          
+          {/* Pagination Controls */}
+          {driftData.length > 0 && (
+            <div className="table-pagination">
+              <div className="pagination-info">
+                Page {currentPage} of {totalPages || 1}
+              </div>
+              <div className="pagination-btns">
+                <button 
+                  className="pag-btn" 
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <i className="bi bi-chevron-left"></i>
+                </button>
+                <button 
+                  className="pag-btn" 
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage >= totalPages}
+                >
+                  <i className="bi bi-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
