@@ -55,8 +55,8 @@ export const adminService = {
     return resp.data;
   },
 
-  getUpcomingRenewals: async () => {
-    const resp = await axios.get(`${API_URL}/subscription/admin/renewals`, getAuthHeaders());
+  getUpcomingRenewals: async (page = 0, size = 10) => {
+    const resp = await axios.get(`${API_URL}/subscription/admin/renewals?page=${page}&size=${size}`, getAuthHeaders());
     return resp.data;
   },
 
@@ -136,12 +136,102 @@ export const adminService = {
      }
   },
 
+  // ── New Dynamic Data Endpoints ──
+
+  getMrrByPlan: async () => {
+    const resp = await axios.get(`${API_URL}/subscription/admin/charts/mrr-by-plan`, getAuthHeaders());
+    return resp.data;
+  },
+
+  getRevenueBreakdown: async () => {
+    const resp = await axios.get(`${API_URL}/subscription/admin/charts/revenue-breakdown`, getAuthHeaders());
+    return resp.data;
+  },
+
+  getARPUByPlan: async () => {
+    const resp = await axios.get(`${API_URL}/subscription/admin/charts/arpu-distribution`, getAuthHeaders());
+    return resp.data;
+  },
+
+  getAdYieldTrends: async () => {
+    const resp = await axios.get(`${API_URL}/analytics/admin/ad-yield`, getAuthHeaders());
+    return resp.data;
+  },
+
+  getPlatformCTR: async () => {
+    const resp = await axios.get(`${API_URL}/analytics/admin/ctr-fill`, getAuthHeaders());
+    return resp.data;
+  },
+
+  getRenewalMetrics: async () => {
+    const resp = await axios.get(`${API_URL}/subscription/admin/renewal-metrics`, getAuthHeaders());
+    return resp.data;
+  },
+
+  getAudienceTrends: async () => {
+    const resp = await axios.get(`${API_URL}/engagementReport/admin/engagement-trends`, getAuthHeaders());
+    return resp.data;
+  },
+
+  getEngagementKPIs: async () => {
+    const resp = await axios.get(`${API_URL}/engagementReport/admin/engagement-kpis`, getAuthHeaders());
+    return resp.data;
+  },
+
+  getWatchTimeTrends: async () => {
+    const resp = await axios.get(`${API_URL}/engagementReport/admin/watch-time-trends`, getAuthHeaders());
+    return resp.data;
+  },
+
+  getRoleDistribution: async () => {
+    const resp = await axios.get(`${API_URL}/user/admin/role-distribution`, getAuthHeaders());
+    return resp.data;
+  },
+
+  getExpiringGrants: async () => {
+    const resp = await axios.get(`${API_URL}/entitlement/admin/expiry-stats`, getAuthHeaders());
+      return resp.data; 
+  },
+
+  getEntitlementDistribution: async () => {
+    const resp = await axios.get(`${API_URL}/entitlement/admin/entitlement-distribution`, getAuthHeaders());
+    return resp.data;
+  },
+
+  getPolicyDrift: async (page = 0, size = 10) => {
+    const resp = await axios.get(`${API_URL}/entitlement/admin/policy-drift?page=${page}&size=${size}`, getAuthHeaders());
+    return resp.data;
+  },
+
+  getAdminStats: async () => {
+    const resp = await axios.get(`${API_URL}/user/admin/admin-stats`, getAuthHeaders());
+    return resp.data;
+  },
+
   getNotifications: async () => {
     try {
-      const resp = await axios.get(`${API_URL}/notification/getAll`, getAuthHeaders());
+      const resp = await axios.get(`${API_URL}/notification/admin/getAll`, getAuthHeaders());
       return resp.data;
     } catch (e) {
       return [];
     }
+  },
+  markAllNotificationsRead: async () => {
+    try {
+      const resp = await axios.put(`${API_URL}/notification/admin/mark-all-read`, getAuthHeaders());
+      return resp.data;
+    } catch (e) {
+      return [];
+    }
+  },
+  // In adminService.js
+  createPlan: async (planData) => {
+    const response = await axios.post(`${API_URL}/plan/admin/add`, planData, getAuthHeaders());
+    return response.data;
+  },
+
+  deletePlan: async (name, billingCycle) => {
+    return await axios.delete(`${API_URL}/plan/admin/delete-by-details`, {params: { name, billingCycle }}, getAuthHeaders());
   }
+  
 };
