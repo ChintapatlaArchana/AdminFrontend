@@ -6,7 +6,7 @@ const categoryStyles = {
   'Subscription': { color: '#10B981', icon: 'bi-credit-card-2-front' },
   'Content': { color: '#8B5CF6', icon: 'bi-play-circle' },
   'Delivery': { color: '#EF4444', icon: 'bi-hdd-network' },
-  'AdOps': { color: '#3B82F6', icon: 'bi-broadcast' }
+  'AdOps': { color: '#f53598ff', icon: 'bi-broadcast' }
 };
 
 const getCategoryColor = (cat) => categoryStyles[cat]?.color || '#94A3B8';
@@ -22,25 +22,7 @@ export const Notifications = () => {
             setLoading(true);
             const data = await adminService.getNotifications();
 
-            // Generate realistic mocks if backend returns empty or basic mock
-            let enriched = data || [];
-            if (enriched.length <= 1) {
-               enriched = [
-                  { id: 101, category: 'Delivery', message: 'CDN PoP latency spike (US-East)', status: 'Unread', createdDate: new Date(Date.now() - 2 * 3600 * 1000) },
-                  { id: 102, category: 'Subscription', message: 'Stripe webhook failure', status: 'Unread', createdDate: new Date(Date.now() - 28 * 3600 * 1000) },
-                  { id: 103, category: 'Content', message: 'Ingest queue backed up', status: 'Unread', createdDate: new Date(Date.now() - 80 * 3600 * 1000) },
-                  { id: 104, category: 'AdOps', message: 'Campaign #8821 under-pacing', status: 'Read', createdDate: new Date(Date.now() - 5 * 3600 * 1000) },
-                  { id: 105, category: 'Delivery', message: 'DRM License server timeout', status: 'Unread', createdDate: new Date(Date.now() - 1 * 3600 * 1000) }
-               ];
-               // Add 5 more random ones
-               const cat = ['Subscription', 'Content', 'Delivery', 'AdOps'];
-               for (let i = 0; i < 5; i++) {
-                  enriched.push({
-                     id: 200 + i, category: cat[i % 4], message: 'System automated alert ' + i, status: i % 2 === 0 ? 'Unread' : 'Read', createdDate: new Date(Date.now() - (i * 10) * 3600 * 1000)
-                  });
-               }
-            }
-            setNotifications(enriched);
+            setNotifications(data || []);
          } catch (e) {
             console.error(e);
          } finally {
@@ -73,6 +55,23 @@ export const Notifications = () => {
       else aging['>72h']++;
    });
 
+   const handleMarkAllRead = async () => {
+    try {
+        // 1. Make the Axios call via your service
+        await adminService.markAllNotificationsRead();
+        
+        // 2. Optimistically update local state so the "New" badges disappear
+        const updatedNotifs = notifications.map(n => ({
+            ...n,
+            status: 'Read'
+        }));
+        setNotifications(updatedNotifs);
+        
+        console.log("All notifications marked as read");
+    } catch (e) {
+        console.error("Failed to mark notifications as read", e);
+    }
+};
    return (
       <div className="dashboard-content">
          <div className="page-header">
@@ -81,7 +80,8 @@ export const Notifications = () => {
          </div>
 
          <div className="d-flex justify-content-end mb-4" style={{ marginTop: '-1rem' }}>
-            <button className="btn btn-outline-purple btn-sm" style={{
+            <button className="btn btn-outline-purple btn-sm" onClick={handleMarkAllRead}
+               style={{
                borderRadius: '8px',
                borderColor: 'rgba(147, 51, 234, 0.4)',
                background: 'rgba(147, 51, 234, 0.05)',
